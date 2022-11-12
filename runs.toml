@@ -1,0 +1,41 @@
+[default] # default base parmeters for the model
+EMB_SIZE = 512
+NHEAD = 8
+FFN_HID_DIM = 512
+BATCH_SIZE = 128
+NUM_ENCODER_LAYERS = 3
+NUM_DECODER_LAYERS = 3
+NUM_EPOCHS = 60
+LR = 0.0001
+dropout = 0
+seed = 42
+tags = [ "no_tag",]
+#special reservre name
+conf_num = 0
+
+[sbatch] # defult of sbatch parmeters replace in array_run.sbatch in a insesative matter
+qos = 'normal'
+partition = 'main'
+time = '0-24:30:00'
+job-name = 'inverse_transformer'
+output = '../logs/job-%A-%a.out'
+conda_env = 'attn'
+
+[runs]
+    [runs.templet] # one arry sbatch file
+    active = true # set this run as active if false will skip the creation and it's run
+        [runs.templet.permute] # overide the defult model parmetrs and permute over them
+        seed = [42,43]
+        [runs.templet.series]
+        # overide parmetrs the list are paired togeter before permuted with the parmeters before
+        # all list should be the same size
+        NUM_ENCODER_LAYERS = [3, 4]
+        NUM_DECODER_LAYERS = [3, 4]
+        # in total we will run the fallowing 4 runs:
+        # [(seed=42,NUM_ENCODER_LAYERS=3, NUM_DECODER_LAYERS=3), (seed=42,NUM_ENCODER_LAYERS=4, NUM_DECODER_LAYERS=4),
+        # (seed=43,NUM_ENCODER_LAYERS=3, NUM_DECODER_LAYERS=3), (seed=32,NUM_ENCODER_LAYERS=4, NUM_DECODER_LAYERS=4)]
+        [runs.templet.common] # overider model parmeters for this run
+        tags = ["test_array_run"]
+        [runs.templet.sbatch] # overide the sbatch prameters for this run
+        partition = "rtx3090"
+        qos = "ZenCoat"
